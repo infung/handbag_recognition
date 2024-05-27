@@ -1,0 +1,14 @@
+.idea
+.venv
+.ipynb_checkpoints
+__pycache__
+
+*.jpg
+*.jperg
+*.png
+*.bmp
+*.csv
+*.h5
+*.pt
+*.pth
+*.json
