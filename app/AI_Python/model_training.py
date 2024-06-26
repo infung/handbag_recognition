@@ -5,23 +5,15 @@ import os
 from typing import Dict, Tuple
 
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-
-# Set options for Pandas DataFrame display
-pd.set_option('max_colwidth', None)  # Do not truncate the contents of cells in the DataFrame
-pd.set_option('display.max_rows', None)  # Display all rows in the DataFrame
-pd.set_option('display.max_columns', None)  # Display all columns in the DataFrame
-
 import timm
 import torch
-import torchvision.transforms.functional as TF
-from PIL import Image, ImageFile, UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError, ImageFile
 from cjm_pandas_utils.core import markdown_to_pandas
 from cjm_pytorch_utils.core import set_seed, get_torch_device
 from sklearn.model_selection import train_test_split
 from timm.models import resnet
-from torch import Tensor, nn
+from torch import Tensor
 from torch.amp import autocast
 from torch.cuda.amp import GradScaler
 from torch.utils.data import Dataset, DataLoader
@@ -30,45 +22,11 @@ from torchtnt.utils import get_module_summary
 from torchvision import transforms
 from tqdm.auto import tqdm
 
+from app.AI_Python import ResizePad
+
 data_path = 'C:\\Users\\Administrator\\Downloads\\bag_image'
 
-ImageFile.LOAD_TRUNCATED_IMAGES = True
-
-seed = 1234
-set_seed(seed)
 device = get_torch_device()
-dtype = torch.float32
-
-
-class ResizePad(nn.Module):
-    def __init__(self, max_sz=256, padding_mode='edge'):
-        """
-        A PyTorch module that resizes an image tensor and adds padding to make it a square tensor.
-
-        Args:
-        max_sz (int, optional): The size of the square tensor.
-        padding_mode (str, optional): The padding mode used when adding padding to the tensor.
-        """
-        super().__init__()
-        self.max_sz = max_sz
-        self.padding_mode = padding_mode
-
-    def forward(self, x):
-        # Get the width and height of the image tensor
-        w, h = TF.get_image_size(x)
-
-        # Resize the image tensor so that its minimum dimension is equal to `max_sz`
-        size = int(min(w, h) / (max(w, h) / self.max_sz))
-        x = TF.resize(x, size=size, antialias=True)
-
-        # Add padding to make the image tensor a square
-        w, h = TF.get_image_size(x)
-        offset = (self.max_sz - min(w, h)) // 2
-        padding = [0, offset] if h < w else [offset, 0]
-        x = TF.pad(x, padding=padding, padding_mode=self.padding_mode)
-        x = TF.resize(x, size=[self.max_sz] * 2, antialias=True)
-
-        return x
 
 
 class CustomImageDataset(Dataset):
@@ -190,7 +148,7 @@ def build_model(class_names):
 
     resnet152 = timm.create_model(resnet_model, pretrained=True, num_classes=len(class_names))
     # Set the device and data type for the model
-    resnet152 = resnet152.to(device=device, dtype=dtype)
+    resnet152 = resnet152.to(device=device, dtype=torch.float32)
     # Add attributes to store the device and model name for later reference
     resnet152.device = device
     resnet152.name = resnet_model
@@ -393,7 +351,7 @@ def train_loop(model,
             torch.save(model.state_dict(), checkpoint_path)
 
             training_metadata = {
-                'epoch': epoch+1,
+                'epoch': epoch + 1,
                 'train_loss': train_loss,
                 'valid_loss': valid_loss,
                 'accuracy': metric_value,
@@ -420,6 +378,15 @@ def train_loop(model,
 
 
 if __name__ == "__main__":
+    # Set options for Pandas DataFrame display
+    pd.set_option('max_colwidth', None)  # Do not truncate the contents of cells in the DataFrame
+    pd.set_option('display.max_rows', None)  # Display all rows in the DataFrame
+    pd.set_option('display.max_columns', None)  # Display all columns in the DataFrame
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+    seed = 1234
+    set_seed(seed)
+
     image_files, class_labels, class_names, class_map = generate_label()
     model_cfg, norm_stats, resnet152 = build_model(class_names)
     train_dataloader, valid_dataloader = generate_dataset(norm_stats, image_files, class_labels, class_map)
