@@ -1,12 +1,10 @@
 import logging
-import traceback
 
 import numpy as np
 from PIL import Image
 from flask import Flask, request, jsonify
 
 from AI_Python.model_inferencing import ClassificationModelInference
-
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
