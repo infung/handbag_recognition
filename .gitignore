@@ -5,7 +5,9 @@ __pycache__
 bin
 lib
 lib64
+share
 
+*.log
 *.cfg
 *.jpg
 *.jperg
