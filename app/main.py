@@ -26,7 +26,7 @@ def predict_bag():
             f = request.files['file']
             img = Image.open(f.stream)
             img = img.resize((224, 224))
-            result = bag_classification_model.model_predict_main(np.array(img.convert('RGB')), 5)
+            result = bag_classification_model.model_predict_main(np.array(img.convert('RGB')), 1)
             return jsonify(result)
         except Exception as error:
             logger.exception(error)

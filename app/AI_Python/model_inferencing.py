@@ -44,6 +44,11 @@ class ClassificationModelInference:
         prediction_scores, prediction_class = torch.topk(model_output, n)
         prediction_scores = prediction_scores.squeeze().tolist()
         prediction_class = prediction_class.squeeze().tolist()
+
+        if n == 1 and str(prediction_class) in self.mapping:
+            result[self.mapping[str(prediction_class)]] = float(prediction_scores)
+            return result
+
         for k, v in zip(prediction_class, prediction_scores):
             if str(k) in self.mapping:
                 result[self.mapping[str(k)]] = float(v)
