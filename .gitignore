@@ -2,7 +2,11 @@
 .venv
 .ipynb_checkpoints
 __pycache__
+bin
+lib
+lib64
 
+*.cfg
 *.jpg
 *.jperg
 *.png
