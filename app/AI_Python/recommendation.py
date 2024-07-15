@@ -74,7 +74,7 @@ def recommend(bag):
     # dump similarity matrix and master bag data to local path using pickle
     with open('similarity.pkl', 'wb') as f1:
         pickle.dump(similarity, f1)
-    with open('masterBagData.pkl', 'rb') as f2:
+    with open('masterBagData.pkl', 'wb') as f2:
         pickle.dump(data, f2)
 
     index = data[data['model'] == bag].index[0]
@@ -85,4 +85,4 @@ def recommend(bag):
         # print(data.iloc[i[0]].masterBagId, data.iloc[i[0]].model, data.iloc[i[0]].color, sep=' ')
     return res
         
-print(recommend("kelly"))
+# print(recommend("kelly"))
