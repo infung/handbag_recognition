@@ -5,6 +5,7 @@ from PIL import Image
 from flask import Flask, request, jsonify
 
 from AI_Python.model_inferencing import ClassificationModelInference
+from AI_Python.recommendation import recommend
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -34,6 +35,17 @@ def predict_bag():
 
     return jsonify({'message': 'Only POST method allowed'}), 400
 
-
+@app.route('/api/recommend', methods=['GET'])
+def recommend_bag():
+    if request.method == 'GET':
+        try:
+            key = request.args.get('model')
+            res = recommend(key)
+            return jsonify(res)
+        except Exception as error:
+            logger.exception(error)
+            return jsonify({'message': 'Failed to recommend related master bags'}), 500
+    return jsonify({'message': 'Only GET method allowed'}), 400
+    
 if __name__ == "__main__":
     app.run()
